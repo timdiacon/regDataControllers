@@ -33,6 +33,31 @@ function updatePage(){
 	});
 }
 
+function displaySearchResults(data){
+	var html = '<thead><tr><th>Organisation Name</th><th>Address Line 1</th><th>Country</th></tr></thead><tbody>';
+
+	extractAddress(data[0]);
+
+	$.each(data, function(index, value){
+		html += '<tr data-toggle="modal" data-target=".bs-example-modal-lg"><td>'+value.Organisation_name+'</td>';
+		html += '<td>'+value.Organisation_address_line_1+'</td>';
+		html += '<td>'+value.Organisation_country+'</td>';
+		html += '<td class="hidden">'+(extractAddress(value) + value.Nature_of_Work_description)+'</td></tr>';
+	});
+
+	html += '</tbody>';
+
+	$("#results").html(html);
+	setupTableListeners();
+}
+
+function setupTableListeners(){
+	$("#results tbody tr").click(function(){
+		$('#myLargeModalLabel').text($(this).find("td:first").text());
+		$('.modal-body').html($(this).find(".hidden").html());
+	});
+}
+
 function addPagination(){	
 	$.getJSON( "http://localhost:3300/api/recordcount/" + currentCompanyName, function(count) {
 		if(count > resultsPerPage){
@@ -66,34 +91,21 @@ function addPagination(){
 	});
 }
 
-function setupTableListeners(){
-	$("#results tbody tr").click(function(){
-		$('#myLargeModalLabel').text($(this).find("td:first").text());
-		$('.modal-body').html($(this).find(".hidden").html());
-	});
-}
-
-function openDetails(){
-
-}
-
 function updatePagination(){
 	$('.pagination li').removeClass('active');
 	$('.pagination li:nth-child('+(currentPage+1)+')').addClass('active');
 }
 
-function displaySearchResults(data){
-	var html = '<thead><tr><th>Organisation Name</th><th>Address Line 1</th><th>Country</th></tr></thead><tbody>';
+/********** UTILS **********/
 
-	$.each(data, function(index, value){
-		html += '<tr data-toggle="modal" data-target=".bs-example-modal-lg"><td>'+value.Organisation_name+'</td>';
-		html += '<td>'+value.Organisation_address_line_1+'</td>';
-		html += '<td>'+value.Organisation_country+'</td>';
-		html += '<td class="hidden">'+value.Nature_of_Work_description+'</td></tr>';
-	});
-
-	html += '</tbody>';
-
-	$("#results").html(html);
-	setupTableListeners();
+function extractAddress(record){
+	var address = '<p><h4>Organisation Address</h4>';
+	if(record.Organisation_address_line_1 != undefined) address += (record.Organisation_address_line_1 + '<br>');
+	if(record.Organisation_address_line_2 != undefined) address += (record.Organisation_address_line_2 + '<br>');
+	if(record.Organisation_address_line_3 != undefined) address += (record.Organisation_address_line_3 + '<br>');
+	if(record.Organisation_address_line_4 != undefined) address += (record.Organisation_address_line_4 + '<br>');
+	if(record.Organisation_address_line_5 != undefined) address += (record.Organisation_address_line_5 + '<br>');
+	if(record.Organisation_postcode != undefined) address += (record.Organisation_postcode + '<br>');
+	if(record.Organisation_country != undefined) address += (record.Organisation_country + '</p><hr>');
+	return address;
 }
